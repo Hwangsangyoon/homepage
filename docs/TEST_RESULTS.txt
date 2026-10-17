@@ -1,0 +1,481 @@
+
+> smart-samsung-optic-netlify-v7@7.0.0 check
+> node --check app.js && node --check server/core.mjs && node --check server/auth.mjs && node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: password hash is salted and correct
+ok 1 - password hash is salted and correct
+  ---
+  duration_ms: 371.124306
+  type: 'test'
+  ...
+# Subtest: malformed hashes fail closed
+ok 2 - malformed hashes fail closed
+  ---
+  duration_ms: 0.508102
+  type: 'test'
+  ...
+# Subtest: safe media URL whitelist rejects script/external/svg
+ok 3 - safe media URL whitelist rejects script/external/svg
+  ---
+  duration_ms: 1.318024
+  type: 'test'
+  ...
+# Subtest: privacy notice review required for intake
+ok 4 - privacy notice review required for intake
+  ---
+  duration_ms: 86.137309
+  type: 'test'
+  ...
+# Subtest: no login cannot read admin data
+ok 5 - no login cannot read admin data
+  ---
+  duration_ms: 2.328769
+  type: 'test'
+  ...
+# Subtest: cross-origin POST rejected
+ok 6 - cross-origin POST rejected
+  ---
+  duration_ms: 3.31782
+  type: 'test'
+  ...
+# Subtest: missing Origin rejected
+ok 7 - missing Origin rejected
+  ---
+  duration_ms: 3.065293
+  type: 'test'
+  ...
+# Subtest: wrong content type rejected
+ok 8 - wrong content type rejected
+  ---
+  duration_ms: 2.16775
+  type: 'test'
+  ...
+# Subtest: seed preserves old edits across repeated public reads
+ok 9 - seed preserves old edits across repeated public reads
+  ---
+  duration_ms: 14.225434
+  type: 'test'
+  ...
+# Subtest: hidden event is never returned by public API
+ok 10 - hidden event is never returned by public API
+  ---
+  duration_ms: 20.50728
+  type: 'test'
+  ...
+# Subtest: empty site does not accept personal posts
+ok 11 - empty site does not accept personal posts
+  ---
+  duration_ms: 3.606673
+  type: 'test'
+  ...
+# Subtest: title is public but body phone name hash are absent
+ok 12 - title is public but body phone name hash are absent
+  ---
+  duration_ms: 127.734802
+  type: 'test'
+  ...
+# Subtest: private post wrong password blocked
+ok 13 - private post wrong password blocked
+  ---
+  duration_ms: 179.21665
+  type: 'test'
+  ...
+# Subtest: private post correct password allows body not contacts
+ok 14 - private post correct password allows body not contacts
+  ---
+  duration_ms: 199.297307
+  type: 'test'
+  ...
+# Subtest: changed admin reads private post without password
+ok 15 - changed admin reads private post without password
+  ---
+  duration_ms: 146.486133
+  type: 'test'
+  ...
+# Subtest: unprotected post requires explicit acknowledgment
+ok 16 - unprotected post requires explicit acknowledgment
+  ---
+  duration_ms: 32.313282
+  type: 'test'
+  ...
+# Subtest: unprotected body readable without password
+ok 17 - unprotected body readable without password
+  ---
+  duration_ms: 10.580841
+  type: 'test'
+  ...
+# Subtest: short post password rejected
+ok 18 - short post password rejected
+  ---
+  duration_ms: 8.610011
+  type: 'test'
+  ...
+# Subtest: no consent rejected
+ok 19 - no consent rejected
+  ---
+  duration_ms: 5.284339
+  type: 'test'
+  ...
+# Subtest: PII title rejected
+ok 20 - PII title rejected
+  ---
+  duration_ms: 10.276278
+  type: 'test'
+  ...
+# Subtest: script title rejected
+ok 21 - script title rejected
+  ---
+  duration_ms: 4.500755
+  type: 'test'
+  ...
+# Subtest: administrator reply visible to verified customer
+ok 22 - administrator reply visible to verified customer
+  ---
+  duration_ms: 169.779754
+  type: 'test'
+  ...
+# Subtest: post deletion hides content while retaining recoverable trash
+ok 23 - post deletion hides content while retaining recoverable trash
+  ---
+  duration_ms: 90.182026
+  type: 'test'
+  ...
+# Subtest: record deletion marks private trash
+ok 24 - record deletion marks private trash
+  ---
+  duration_ms: 11.125686
+  type: 'test'
+  ...
+# Subtest: lost update prevented with ETag conflict
+ok 25 - lost update prevented with ETag conflict
+  ---
+  duration_ms: 6.298243
+  type: 'test'
+  ...
+# Subtest: negative inventory rejected
+ok 26 - negative inventory rejected
+  ---
+  duration_ms: 4.85706
+  type: 'test'
+  ...
+# Subtest: unknown collection rejected
+ok 27 - unknown collection rejected
+  ---
+  duration_ms: 5.012681
+  type: 'test'
+  ...
+# Subtest: invalid image type rejected
+ok 28 - invalid image type rejected
+  ---
+  duration_ms: 5.024611
+  type: 'test'
+  ...
+# Subtest: forged PNG signature rejected
+ok 29 - forged PNG signature rejected
+  ---
+  duration_ms: 4.167759
+  type: 'test'
+  ...
+# Subtest: valid image persists via media handler
+ok 30 - valid image persists via media handler
+  ---
+  duration_ms: 11.806489
+  type: 'test'
+  ...
+# Subtest: test messages are records only and never call provider
+ok 31 - test messages are records only and never call provider
+  ---
+  duration_ms: 8.194434
+  type: 'test'
+  ...
+# Subtest: manual message is not delivery proof
+ok 32 - manual message is not delivery proof
+  ---
+  duration_ms: 10.873281
+  type: 'test'
+  ...
+# Subtest: live disabled without credentials
+ok 33 - live disabled without credentials
+  ---
+  duration_ms: 11.697749
+  type: 'test'
+  ...
+# Subtest: idempotency prevents duplicate actual dispatch and accepted is not delivered
+ok 34 - idempotency prevents duplicate actual dispatch and accepted is not delivered
+  ---
+  duration_ms: 10.889266
+  type: 'test'
+  ...
+# Subtest: legacy import ignores secret settings and keeps inquiries private
+ok 35 - legacy import ignores secret settings and keeps inquiries private
+  ---
+  duration_ms: 21.132599
+  type: 'test'
+  ...
+# Subtest: legacy import is additive and duplicate-safe
+ok 36 - legacy import is additive and duplicate-safe
+  ---
+  duration_ms: 30.737859
+  type: 'test'
+  ...
+# Subtest: v3 notice active=false imports as public ordinary notice
+ok 37 - v3 notice active=false imports as public ordinary notice
+  ---
+  duration_ms: 9.159011
+  type: 'test'
+  ...
+# Subtest: v6 hidden event stays hidden on import
+ok 38 - v6 hidden event stays hidden on import
+  ---
+  duration_ms: 5.800224
+  type: 'test'
+  ...
+# Subtest: new app instance reuses records and administrator
+ok 39 - new app instance reuses records and administrator
+  ---
+  duration_ms: 9.351426
+  type: 'test'
+  ...
+# Subtest: expired sessions are rejected
+ok 40 - expired sessions are rejected
+  ---
+  duration_ms: 5.03486
+  type: 'test'
+  ...
+# Subtest: backup omits administrator password and sessions
+ok 41 - backup omits administrator password and sessions
+  ---
+  duration_ms: 11.98209
+  type: 'test'
+  ...
+# Subtest: OTP bootstrap needs two server settings; secrets never returned
+ok 42 - OTP bootstrap needs two server settings; secrets never returned
+  ---
+  duration_ms: 64.797427
+  type: 'test'
+  ...
+# Subtest: missing email config fails closed
+ok 43 - missing email config fails closed
+  ---
+  duration_ms: 5.050501
+  type: 'test'
+  ...
+# Subtest: missing email key fails clearly
+ok 44 - missing email key fails clearly
+  ---
+  duration_ms: 4.156959
+  type: 'test'
+  ...
+# Subtest: unknown email cannot receive code or create admin
+ok 45 - unknown email cannot receive code or create admin
+  ---
+  duration_ms: 11.286776
+  type: 'test'
+  ...
+# Subtest: six digit OTP is not exposed in response or plain storage
+ok 46 - six digit OTP is not exposed in response or plain storage
+  ---
+  duration_ms: 5.878939
+  type: 'test'
+  ...
+# Subtest: valid OTP signs in with HttpOnly secure session cookie
+ok 47 - valid OTP signs in with HttpOnly secure session cookie
+  ---
+  duration_ms: 10.389765
+  type: 'test'
+  ...
+# Subtest: wrong OTP rejected and attempts counted
+ok 48 - wrong OTP rejected and attempts counted
+  ---
+  duration_ms: 34.075831
+  type: 'test'
+  ...
+# Subtest: OTP expires at ten minutes
+ok 49 - OTP expires at ten minutes
+  ---
+  duration_ms: 14.581726
+  type: 'test'
+  ...
+# Subtest: used OTP cannot be replayed
+ok 50 - used OTP cannot be replayed
+  ---
+  duration_ms: 10.433319
+  type: 'test'
+  ...
+# Subtest: concurrent OTP verification consumes code once
+ok 51 - concurrent OTP verification consumes code once
+  ---
+  duration_ms: 18.896589
+  type: 'test'
+  ...
+# Subtest: OTP resend cooldown is enforced
+ok 52 - OTP resend cooldown is enforced
+  ---
+  duration_ms: 5.094562
+  type: 'test'
+  ...
+# Subtest: new OTP invalidates previous challenge
+ok 53 - new OTP invalidates previous challenge
+  ---
+  duration_ms: 16.218177
+  type: 'test'
+  ...
+# Subtest: changing owner email invalidates old sessions
+ok 54 - changing owner email invalidates old sessions
+  ---
+  duration_ms: 6.993782
+  type: 'test'
+  ...
+# Subtest: logout all revokes sessions
+ok 55 - logout all revokes sessions
+  ---
+  duration_ms: 5.827405
+  type: 'test'
+  ...
+# Subtest: legacy 1111 route removed
+ok 56 - legacy 1111 route removed
+  ---
+  duration_ms: 0.910622
+  type: 'test'
+  ...
+# Subtest: mail provider failure is not reported as sent
+ok 57 - mail provider failure is not reported as sent
+  ---
+  duration_ms: 9.800543
+  type: 'test'
+  ...
+# Subtest: provider request uses idempotency and text code, not magic link
+ok 58 - provider request uses idempotency and text code, not magic link
+  ---
+  duration_ms: 3.238343
+  type: 'test'
+  ...
+# Subtest: post missing request key fails before storing
+ok 59 - post missing request key fails before storing
+  ---
+  duration_ms: 5.544266
+  type: 'test'
+  ...
+# Subtest: same post retried after lost response stores once
+ok 60 - same post retried after lost response stores once
+  ---
+  duration_ms: 225.500309
+  type: 'test'
+  ...
+# Subtest: concurrent double submission stores one record
+ok 61 - concurrent double submission stores one record
+  ---
+  duration_ms: 174.344603
+  type: 'test'
+  ...
+# Subtest: same request key cannot replace content
+ok 62 - same request key cannot replace content
+  ---
+  duration_ms: 88.756579
+  type: 'test'
+  ...
+# Subtest: consultation inquiry and reservation create correctly
+ok 63 - consultation inquiry and reservation create correctly
+  ---
+  duration_ms: 279.097006
+  type: 'test'
+  ...
+# Subtest: deleted public post is not visible even with correct password
+ok 64 - deleted public post is not visible even with correct password
+  ---
+  duration_ms: 65.19871
+  type: 'test'
+  ...
+# Subtest: admin restores deleted private post without changing password
+ok 65 - admin restores deleted private post without changing password
+  ---
+  duration_ms: 146.209497
+  type: 'test'
+  ...
+# Subtest: permanent purge removes personal content and prevents restore
+ok 66 - permanent purge removes personal content and prevents restore
+  ---
+  duration_ms: 67.912737
+  type: 'test'
+  ...
+# Subtest: guests cannot delete or restore records
+ok 67 - guests cannot delete or restore records
+  ---
+  duration_ms: 5.08025
+  type: 'test'
+  ...
+# Subtest: message history has admin delete and restore
+ok 68 - message history has admin delete and restore
+  ---
+  duration_ms: 21.375892
+  type: 'test'
+  ...
+# Subtest: deleted message id cannot initiate another paid send
+ok 69 - deleted message id cannot initiate another paid send
+  ---
+  duration_ms: 8.055892
+  type: 'test'
+  ...
+# Subtest: daily backup runs and stores last successful result
+ok 70 - daily backup runs and stores last successful result
+  ---
+  duration_ms: 105.080706
+  type: 'test'
+  ...
+# Subtest: daily backup retention removes snapshots older than seven days
+ok 71 - daily backup retention removes snapshots older than seven days
+  ---
+  duration_ms: 71.983294
+  type: 'test'
+  ...
+# Subtest: thirty day deleted data is purged but live data kept
+ok 72 - thirty day deleted data is purged but live data kept
+  ---
+  duration_ms: 20.44491
+  type: 'test'
+  ...
+# Subtest: v6 data and photo paths persist after v7 email activation
+ok 73 - v6 data and photo paths persist after v7 email activation
+  ---
+  duration_ms: 19.300225
+  type: 'test'
+  ...
+# Subtest: backup append import preserves record IDs and message history
+ok 74 - backup append import preserves record IDs and message history
+  ---
+  duration_ms: 28.482636
+  type: 'test'
+  ...
+# Subtest: storage waiting is bounded with a specific error
+ok 75 - storage waiting is bounded with a specific error
+  ---
+  duration_ms: 39.715429
+  type: 'test'
+  ...
+# Subtest: provider invalid_api_key 403 is distinct from unverified sender
+ok 76 - provider invalid_api_key 403 is distinct from unverified sender
+  ---
+  duration_ms: 3.122353
+  type: 'test'
+  ...
+# Subtest: admin does not silently hide records after first 200 posts
+ok 77 - admin does not silently hide records after first 200 posts
+  ---
+  duration_ms: 32.756815
+  type: 'test'
+  ...
+1..77
+# tests 77
+# suites 0
+# pass 77
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1885.444295
+
+> smart-samsung-optic-netlify-v7@7.0.0 build
+> node scripts/build.mjs
+
+Public build ready: index.html / app.js / styles / assets only. No SQL, secret, guide, or server files published.

@@ -1,2 +1,2 @@
-Original file: Homepage.zip
-Original index.html preserved as reference outside publish directory.
+Source reference: Homepage.zip and supplied v6 package.
+Original v3-derived stylesheet and supplied photo assets are retained; legacy authentication scripts are not published.

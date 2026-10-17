@@ -1,24 +1,40 @@
-# SMART OPTIC v6.0.0
+# SMART OPTIC v7.0.0
 
-v3 디자인 기반 / Netlify Functions + Blobs / GitHub 배포. Supabase 미사용.
+**먼저 START_HERE.html을 여세요. 기존 Netlify 프로젝트를 삭제하지 않습니다.**
 
-1. START_HERE.html을 열어 전체 안내를 확인합니다.
-2. GitHub 새 비공개 저장소에 파일을 루트에 업로드합니다.
-3. 기존 Netlify 프로젝트에 OPTIC_SETUP_KEY(20자 이상 난수)를 등록하고 저장소를 연결합니다.
-4. build: npm run build, publish: dist, functions: netlify/functions, Node22.
-5. 초기 관리자1111 + 소유자 설정코드 → 비밀번호12자 이상 변경 → 개인정보안내 검토 → 접수열기.
+## 변경사항
+- v3 기반 디자인 유지. v6 Netlify 자료 저장소 재사용.
+- 비밀번호/OPTIC_SETUP_KEY 제거, 관리자 이메일 6자리 OTP 로그인.
+- 검안·고객상담·예약 신청 응답시간 제한, 중복클릭·중복저장 방지, 오류 시 입력 유지.
+- 관리자 등록자료/게시글/발송이력 삭제, 휴지통 복원/영구삭제.
+- 관리자 JSON 내보내기/추가 가져오기, 한국시간 매일 04:17 자료백업·만료기록 정리.
 
-## 로컬 시연
-Node22에서 npm test, npm run build, npm run dev. 로컬 시연자료는 메모리 저장이며 서버 종료 시 초기화됩니다. 실제 고객자료는 넣지 마세요.
+## 초기 환경변수
+필수 `OPTIC_ADMIN_EMAIL`, `RESEND_API_KEY` (Functions/Production).
+운영 권장 `OPTIC_FROM_EMAIL` (Resend 인증한 발신 도메인).
+테스트 기본 발신자 onboarding@resend.dev는 Resend 가입 이메일로만 발송 가능.
+변경 후 재배포. 기존 1111, OPTIC_SETUP_KEY, Supabase 환경변수는 v7에서 사용하지 않습니다.
+실제 SMS/Kakao는 기본 비활성. SOLAPI 기존 설정은 .env.example 참고.
 
-## 배포 주의
-GitHub 연결 빌드를 사용합니다. 화면 파일만 드롭하면 서버 저장기능이 배포되지 않습니다. Netlify Blobs는 같은 프로젝트 내 배포가 공유하므로 시험배포도 실제자료를 수정할 수 있습니다.
+## 배포
+기존 GitHub 저장소 → 동일 Netlify 프로젝트 연결.
+Node 22 / Build `npm run check && npm run build` / Publish `dist` / Functions `netlify/functions`.
+서버함수가 필요하므로 정적파일 드래그배포로 대체하지 마세요.
+선택 CLI: 01_LOGIN.cmd → 03_UPDATE_SITE.cmd, 현재 Project ID 입력. SITE_ID.txt는 의도적으로 빈 파일입니다.
 
-## 운영
-사진·팝업·글 답변·제품정보는 관리자 화면에서 저장합니다. 코드수정만 GitHub Commit → Netlify 자동배포로 진행합니다. 코드rollback과 데이터rollback은 별개입니다.
+## 로컬 시험
+`npm test`, `npm run build`는 외부서비스 없이 시험 가능.
+`npm run dev`는 127.0.0.1:8877 루프백 모의환경. 실제 메일/데이터와 무관하며 재시작하면 초기화.
+로컬 인증번호는 개발용 콘솔에만 출력. 운영 서버에는 이러한 경로가 없습니다.
+실제 Netlify SDK 설치는 `npm install` 필요. SDK @netlify/blobs 11.1.4 고정.
 
-## 백업
-고객 백업JSON과 원본이미지는 비공개로 별도보관합니다. 가져오기는 추가형입니다. 설정·사진·전체메시지 완전복원은 별도검토합니다.
+## 데이터 중요사항
+store 이름 optic-v6-data, optic-v6-media를 절대로 버전별로 바꾸지 않습니다.
+getStore는 사이트범위이므로 배포버전 간 자료를 공유. 같은 프로젝트의 Draft도 실제 자료를 공유합니다.
+새 프로젝트로 이전하면 자동이관되지 않습니다. Supabase 자료도 자동이관되지 않습니다.
+JSON 백업에는 이미지 바이너리·인증비밀키 제외. 사진 원본 별도 보관.
+삭제된 자료는 30일 휴지통, 기존 JSON백업 사본은 최근7일 남을 수 있음.
+현재 백업은 논리적 레코드 사본이며 트랜잭션 시점백업/독립재해복구가 아닙니다.
 
-## 외부 연동
-SOLAPI는 선택 사항이며 기본실제발송OFF. SMS/알림톡은업체계정·발신번호·템플릿승인·과금설정이별도로필요합니다.
+## 검증
+실제 수행결과 docs/QA_REPORT.md 참고. 실계정 배포·메일 전달·외부발송은 아직 수행하지 않았습니다.

@@ -1,47 +1,114 @@
 [
   {
-    "name": "Desktop home renders",
-    "passed": true
+    "test": "v3-based homepage and October popup render",
+    "pass": true
   },
   {
-    "name": "Administrator login separate from public menus",
-    "passed": true
+    "test": "email OTP administrator login",
+    "pass": true
   },
   {
-    "name": "Initial password + owner code login",
-    "passed": true
+    "test": "existing admin settings saved and public intake enabled",
+    "pass": true
   },
   {
-    "name": "Password change returns to login",
-    "passed": true
+    "test": "home image upload and persistent configuration",
+    "pass": true
   },
   {
-    "name": "Changed password logs in without setup code",
-    "passed": true
+    "test": "product create via existing management UI",
+    "pass": true
   },
   {
-    "name": "Privacy review and intake enable save",
-    "passed": true
+    "test": "admin delete moves record to private trash",
+    "pass": true
   },
   {
-    "name": "Four independent image editors",
-    "passed": true
+    "test": "admin restore action completes",
+    "pass": true
   },
   {
-    "name": "Photo upload and settings persist",
-    "passed": true
+    "test": "manual daily server backup is downloadable",
+    "pass": true
   },
   {
-    "name": "Image notice create",
-    "passed": true
+    "test": "consult submission sends only once and ends",
+    "pass": true
   },
   {
-    "name": "Popup settings editable",
-    "passed": true
+    "test": "consult submit button shows completed state",
+    "pass": true
   },
   {
-    "passed": false,
-    "error": "Locator.fill: Error: strict mode violation: locator(\"textarea[name=content]\") resolved to 2 elements:\n    1) <textarea name=\"content\"></textarea> aka locator(\"#app textarea[name=\\\"content\\\"]\")\n    2) <textarea name=\"content\"></textarea> aka get_by_label(\"새 자료 등록\").locator(\"textarea[name=\\\"content\\\"]\")\n\nCall log:\n  - waiting for locator(\"textarea[name=content]\")\n",
-    "trace": "Traceback (most recent call last):\n  File \"/mnt/data/optic_v6_work/qa_ui.py\", line 52, in <module>\n    page.evaluate(\"location.hash='admin/messages'\");page.wait_for_selector('[data-form=message]');page.locator('input[name=name]').fill('테스트고객');page.locator('input[name=phone]').fill('01012345678');page.locator('textarea[name=content]').fill('테스트만 기록합니다.');page.locator('[data-form=message] button').click();page.wait_for_selector('text=테스트만 기록합니다.');ok('Test message history saved without real dispatch')\n                                                                                                                                                                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/pyvenv/lib/python3.13/site-packages/playwright/sync_api/_generated.py\", line 15989, in fill\n    self._sync(\n    ~~~~~~~~~~^\n        self._impl_obj.fill(\n        ^^^^^^^^^^^^^^^^^^^^\n            value=value, timeout=timeout, noWaitAfter=no_wait_after, force=force\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        )\n        ^\n    )\n    ^\n  File \"/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_sync_base.py\", line 115, in _sync\n    return task.result()\n           ~~~~~~~~~~~^^\n  File \"/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_locator.py\", line 215, in fill\n    return await self._frame.fill(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_frame.py\", line 607, in fill\n    await self._fill(**locals_to_params(locals()))\n  File \"/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_frame.py\", line 619, in _fill\n    await self._channel.send(\"fill\", self._timeout, locals_to_params(locals()))\n  File \"/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_connection.py\", line 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<3 lines>...\n    )\n    ^\n  File \"/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.Error: Locator.fill: Error: strict mode violation: locator(\"textarea[name=content]\") resolved to 2 elements:\n    1) <textarea name=\"content\"></textarea> aka locator(\"#app textarea[name=\\\"content\\\"]\")\n    2) <textarea name=\"content\"></textarea> aka get_by_label(\"새 자료 등록\").locator(\"textarea[name=\\\"content\\\"]\")\n\nCall log:\n  - waiting for locator(\"textarea[name=content]\")\n\n"
+    "test": "inquiry submission sends only once and ends",
+    "pass": true
+  },
+  {
+    "test": "inquiry submit button shows completed state",
+    "pass": true
+  },
+  {
+    "test": "reservation submission sends only once and ends",
+    "pass": true
+  },
+  {
+    "test": "reservation submit button shows completed state",
+    "pass": true
+  },
+  {
+    "test": "wrong secret-board password rejected",
+    "pass": true
+  },
+  {
+    "test": "correct secret-board password allows content",
+    "pass": true
+  },
+  {
+    "test": "network failure recovers submit button",
+    "pass": true
+  },
+  {
+    "test": "network failure preserves typed form",
+    "pass": true
+  },
+  {
+    "test": "network failure does not auto-loop",
+    "pass": true
+  },
+  {
+    "test": "manual retry after network failure succeeds",
+    "pass": true
+  },
+  {
+    "test": "administrator can answer without a post password",
+    "pass": true
+  },
+  {
+    "test": "test SMS creates a log, not a real dispatch",
+    "pass": true
+  },
+  {
+    "test": "administrator can delete message history",
+    "pass": true
+  },
+  {
+    "test": "mobile OTP login no horizontal overflow",
+    "pass": true
+  },
+  {
+    "test": "no uncaught browser JavaScript errors",
+    "pass": true
+  },
+  {
+    "test": "20-second client abort stops a stalled request",
+    "pass": true
+  },
+  {
+    "test": "timeout keeps entered content",
+    "pass": true
+  },
+  {
+    "test": "timeout never starts an automatic request loop",
+    "pass": true
   }
 ]

@@ -1,21 +1,30 @@
-# v6.0.0 로컬 검증 결과
+# v7.0.0 검증 기록 · 2026-10-17
 
-- JavaScript 구문검사: 9/9
-- Node 서버 자동테스트: 통과 53, 실패 0
-- 공개 폴더 빌드: 성공
-- 격리 브라우저 점검: 통과 10, 실패 1
+## 실제 실행 결과
+- Node.js v22.16.0: `npm run check` -> **77 tests / 77 pass / 0 fail**.
+- 공개 배포물 build -> index.html, app.js, styles, assets만 dist로 복사. server/SQL/env/guide/인증코드 파일 미포함.
+- Python Playwright + 시스템 Chromium: PC/모바일 격리 브라우저 모의 점검 **28개 통과**.
+- ZIP 생성 후 CRC 검사, 압축해제, 스크립트 구문 및 Node 테스트 재실행 확인.
 
-## 범위
-서버 테스트는 실제 Netlify SDK 대신 MemoryStore 어댑터를 사용합니다. UI는 로컬 API에 연결한 격리 브라우저(about:blank 주입)로 검사했습니다. 관리형 브라우저의 URL 정책을 변경하지 않았습니다. 실제 Netlify/GitHub/Hosting.kr 계정 배포·DNS/TLS·유료 문자/카카오 발송·외부 침투시험은 수행하지 않았습니다.
+## 브라우저 시험 방법
+환경의 Chromium URL 탐색 제한 정책을 우회하거나 변경하지 않았습니다. 제공 HTML/CSS/JS를 set_content로 격리 렌더링하고, QA 전용 fetch 바인딩으로 Python이 루프백 Node 서버에 요청했습니다. 이미지 원본은 QA 중 data URI로 공급했습니다. 응답시간 제한 시험은 실제로 20초 기다려 AbortController 경로를 확인했습니다. 이 QA 연결 코드는 납품 app.js에 삽입하지 않았습니다.
 
-## 운영 전 확인
-Netlify의 npm 설치 및 Functions 빌드, Blobs 저장 유지, 소유자 코드, 새 비밀번호, 공개 제목/비밀 본문, 사진 업로드, 독립 브라우저 조회, 실제 DNS와 HTTPS를 확인해야 합니다. 테스트 성공이 서비스 전체의 보안·법적 적합성이나 실계정 배포 성공을 보장하지 않습니다.
+## 시험 항목
+이메일OTP 정상/오류/만료/재사용/동시사용/발송제한/소유자변경/로그아웃, 인증없이 관리자자료 접근차단, CSRF/위험이미지 제한, 비밀글 비밀번호 검증, 공개목록 개인정보 비노출, 세 상담종류 중복클릭 및 동일요청 재시도, 응답지연 후 입력유지·버튼복구·자동재요청 없음, 제품/기록/글/발송이력 삭제·복원·영구삭제, TEST발송 실제API 호출 없음, 백업/이관/7일 보관/30일 휴지통정리, 기존200건 이후 관리자자료 접근, 모바일 가로넘침 없음.
 
-## UI 검사 제한/실패
-- Locator.fill: Error: strict mode violation: locator("textarea[name=content]") resolved to 2 elements:
-    1) <textarea name="content"></textarea> aka locator("#app textarea[name=\"content\"]")
-    2) <textarea name="content"></textarea> aka get_by_label("새 자료 등록").locator("textarea[name=\"content\"]")
+## 미실시 / 제한
+- 실제 사용자 Netlify 계정 배포·Blobs 네트워크 동작·Functions 환경변수 적용은 수행하지 않음.
+- npm 외부 네트워크 접근 제한으로 @netlify/blobs 11.1.4 설치/라이브SDK 시험은 미실시. 공식 문서의 API 및 모의저장소로 검증. Netlify 최초 빌드에서 의존성 설치 필요.
+- 실제 Resend 가입/인증메일 발송/수신·SOLAPI 실제 발송·GitHub Push·Hosting.kr DNS 변경 미실시.
+- 보안 전문 침투테스트·부하시험·제3자 보안인증을 받은 것은 아님.
+- 운영 v6 오류의 실제 실패요청/로그를 확보하지 않았으므로 단일 원인 확정 아님. 소스상 반복·타임아웃 취약 경로와 재현 가능한 회복 동작을 보완.
 
-Call log:
-  - waiting for locator("textarea[name=content]")
-
+## 배포 후 인수검사
+1. 현재 v6 Netlify Project ID를 유지하고 두 이메일환경변수 등록.
+2. GitHub 검사/빌드/정식배포, /#diagnostics 확인.
+3. 관리자 실제 이메일로 인증번호 수신 -> 1회 로그인. 오입력/만료 메시지 확인.
+4. 개인정보 안내 확인/접수허용 저장 -> 고객 가짜자료로 검안·문의·예약 각1건 -> 제목 공개/본문 보호 확인.
+5. 관리자 답변·삭제·복원 -> 로그아웃 후 접근차단 확인.
+6. 사진·팝업·공지이미지 저장 -> 다른 브라우저에서도 반영 확인.
+7. JSON 내보내기, 재배포 후 자료 유지, 다음날 백업 시각 확인.
+8. 실제 문자·카톡은 별도 발신번호/동의/업체 설정 및 소액 시험 후 사용.
