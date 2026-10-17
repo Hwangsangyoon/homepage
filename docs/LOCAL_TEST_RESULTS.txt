@@ -1,0 +1,332 @@
+
+> smart-samsung-optic-netlify-v6@6.0.0 test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: password hash is salted and correct
+ok 1 - password hash is salted and correct
+  ---
+  duration_ms: 436.636891
+  type: 'test'
+  ...
+# Subtest: malformed hashes fail closed
+ok 2 - malformed hashes fail closed
+  ---
+  duration_ms: 0.20639
+  type: 'test'
+  ...
+# Subtest: safe media URL whitelist rejects script/external/svg
+ok 3 - safe media URL whitelist rejects script/external/svg
+  ---
+  duration_ms: 0.956977
+  type: 'test'
+  ...
+# Subtest: health contains no secret
+ok 4 - health contains no secret
+  ---
+  duration_ms: 57.828924
+  type: 'test'
+  ...
+# Subtest: initial 1111 needs owner key
+ok 5 - initial 1111 needs owner key
+  ---
+  duration_ms: 5.772111
+  type: 'test'
+  ...
+# Subtest: missing environment key blocks initialization
+ok 6 - missing environment key blocks initialization
+  ---
+  duration_ms: 3.257452
+  type: 'test'
+  ...
+# Subtest: initial login produces HttpOnly secure cookie
+ok 7 - initial login produces HttpOnly secure cookie
+  ---
+  duration_ms: 135.580061
+  type: 'test'
+  ...
+# Subtest: password changes revoke old token
+ok 8 - password changes revoke old token
+  ---
+  duration_ms: 312.777393
+  type: 'test'
+  ...
+# Subtest: weak new password rejected
+ok 9 - weak new password rejected
+  ---
+  duration_ms: 237.193022
+  type: 'test'
+  ...
+# Subtest: incorrect current password rejected
+ok 10 - incorrect current password rejected
+  ---
+  duration_ms: 246.07571
+  type: 'test'
+  ...
+# Subtest: default admin cannot export customer data
+ok 11 - default admin cannot export customer data
+  ---
+  duration_ms: 158.258588
+  type: 'test'
+  ...
+# Subtest: default admin cannot enable public intake
+ok 12 - default admin cannot enable public intake
+  ---
+  duration_ms: 144.830707
+  type: 'test'
+  ...
+# Subtest: privacy notice review required for intake
+ok 13 - privacy notice review required for intake
+  ---
+  duration_ms: 389.863037
+  type: 'test'
+  ...
+# Subtest: no login cannot read admin data
+ok 14 - no login cannot read admin data
+  ---
+  duration_ms: 2.118048
+  type: 'test'
+  ...
+# Subtest: cross-origin POST rejected
+ok 15 - cross-origin POST rejected
+  ---
+  duration_ms: 1.208193
+  type: 'test'
+  ...
+# Subtest: missing Origin rejected
+ok 16 - missing Origin rejected
+  ---
+  duration_ms: 1.329177
+  type: 'test'
+  ...
+# Subtest: wrong content type rejected
+ok 17 - wrong content type rejected
+  ---
+  duration_ms: 6.021974
+  type: 'test'
+  ...
+# Subtest: GET cannot change password
+ok 18 - GET cannot change password
+  ---
+  duration_ms: 3.684079
+  type: 'test'
+  ...
+# Subtest: seed preserves old edits across repeated public reads
+ok 19 - seed preserves old edits across repeated public reads
+  ---
+  duration_ms: 20.750568
+  type: 'test'
+  ...
+# Subtest: hidden event is never returned by public API
+ok 20 - hidden event is never returned by public API
+  ---
+  duration_ms: 382.172147
+  type: 'test'
+  ...
+# Subtest: empty site does not accept personal posts
+ok 21 - empty site does not accept personal posts
+  ---
+  duration_ms: 3.553979
+  type: 'test'
+  ...
+# Subtest: title is public but body phone name hash are absent
+ok 22 - title is public but body phone name hash are absent
+  ---
+  duration_ms: 402.166441
+  type: 'test'
+  ...
+# Subtest: private post wrong password blocked
+ok 23 - private post wrong password blocked
+  ---
+  duration_ms: 492.230761
+  type: 'test'
+  ...
+# Subtest: private post correct password allows body not contacts
+ok 24 - private post correct password allows body not contacts
+  ---
+  duration_ms: 525.752578
+  type: 'test'
+  ...
+# Subtest: changed admin reads private post without password
+ok 25 - changed admin reads private post without password
+  ---
+  duration_ms: 464.81285
+  type: 'test'
+  ...
+# Subtest: unprotected post requires explicit acknowledgment
+ok 26 - unprotected post requires explicit acknowledgment
+  ---
+  duration_ms: 367.16883
+  type: 'test'
+  ...
+# Subtest: unprotected body readable without password
+ok 27 - unprotected body readable without password
+  ---
+  duration_ms: 379.649258
+  type: 'test'
+  ...
+# Subtest: short post password rejected
+ok 28 - short post password rejected
+  ---
+  duration_ms: 384.819874
+  type: 'test'
+  ...
+# Subtest: no consent rejected
+ok 29 - no consent rejected
+  ---
+  duration_ms: 379.724012
+  type: 'test'
+  ...
+# Subtest: PII title rejected
+ok 30 - PII title rejected
+  ---
+  duration_ms: 382.902396
+  type: 'test'
+  ...
+# Subtest: script title rejected
+ok 31 - script title rejected
+  ---
+  duration_ms: 362.728168
+  type: 'test'
+  ...
+# Subtest: administrator reply visible to verified customer
+ok 32 - administrator reply visible to verified customer
+  ---
+  duration_ms: 531.378886
+  type: 'test'
+  ...
+# Subtest: post deletion purges contacts and content
+ok 33 - post deletion purges contacts and content
+  ---
+  duration_ms: 454.783624
+  type: 'test'
+  ...
+# Subtest: record deletion purges old customer fields
+ok 34 - record deletion purges old customer fields
+  ---
+  duration_ms: 466.916939
+  type: 'test'
+  ...
+# Subtest: lost update prevented with ETag conflict
+ok 35 - lost update prevented with ETag conflict
+  ---
+  duration_ms: 394.445802
+  type: 'test'
+  ...
+# Subtest: negative inventory rejected
+ok 36 - negative inventory rejected
+  ---
+  duration_ms: 389.938997
+  type: 'test'
+  ...
+# Subtest: unknown collection rejected
+ok 37 - unknown collection rejected
+  ---
+  duration_ms: 355.010064
+  type: 'test'
+  ...
+# Subtest: invalid image type rejected
+ok 38 - invalid image type rejected
+  ---
+  duration_ms: 367.699948
+  type: 'test'
+  ...
+# Subtest: forged PNG signature rejected
+ok 39 - forged PNG signature rejected
+  ---
+  duration_ms: 400.028546
+  type: 'test'
+  ...
+# Subtest: valid image persists via media handler
+ok 40 - valid image persists via media handler
+  ---
+  duration_ms: 413.674453
+  type: 'test'
+  ...
+# Subtest: test messages are records only and never call provider
+ok 41 - test messages are records only and never call provider
+  ---
+  duration_ms: 349.776089
+  type: 'test'
+  ...
+# Subtest: manual message is not delivery proof
+ok 42 - manual message is not delivery proof
+  ---
+  duration_ms: 446.303254
+  type: 'test'
+  ...
+# Subtest: live disabled without credentials
+ok 43 - live disabled without credentials
+  ---
+  duration_ms: 366.099364
+  type: 'test'
+  ...
+# Subtest: idempotency prevents duplicate actual dispatch and accepted is not delivered
+ok 44 - idempotency prevents duplicate actual dispatch and accepted is not delivered
+  ---
+  duration_ms: 377.81087
+  type: 'test'
+  ...
+# Subtest: owner reset needs new version and code
+ok 45 - owner reset needs new version and code
+  ---
+  duration_ms: 482.146591
+  type: 'test'
+  ...
+# Subtest: legacy import ignores secret settings and keeps inquiries private
+ok 46 - legacy import ignores secret settings and keeps inquiries private
+  ---
+  duration_ms: 386.331448
+  type: 'test'
+  ...
+# Subtest: legacy import is additive and duplicate-safe
+ok 47 - legacy import is additive and duplicate-safe
+  ---
+  duration_ms: 400.51957
+  type: 'test'
+  ...
+# Subtest: v3 notice active=false imports as public ordinary notice
+ok 48 - v3 notice active=false imports as public ordinary notice
+  ---
+  duration_ms: 364.018061
+  type: 'test'
+  ...
+# Subtest: v6 hidden event stays hidden on import
+ok 49 - v6 hidden event stays hidden on import
+  ---
+  duration_ms: 384.19015
+  type: 'test'
+  ...
+# Subtest: new app instance reuses records and administrator
+ok 50 - new app instance reuses records and administrator
+  ---
+  duration_ms: 391.91929
+  type: 'test'
+  ...
+# Subtest: login rate limiter limits repeated attempts
+ok 51 - login rate limiter limits repeated attempts
+  ---
+  duration_ms: 12.389224
+  type: 'test'
+  ...
+# Subtest: expired sessions are rejected
+ok 52 - expired sessions are rejected
+  ---
+  duration_ms: 409.396392
+  type: 'test'
+  ...
+# Subtest: backup omits administrator password and sessions
+ok 53 - backup omits administrator password and sessions
+  ---
+  duration_ms: 572.874583
+  type: 'test'
+  ...
+1..53
+# tests 53
+# suites 0
+# pass 53
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 15674.113573

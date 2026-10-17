@@ -1,0 +1,7 @@
+현재버전: SMART OPTIC v6.0.0
+기반: 이GitHub소스 ZIP. Netlify Functions + Netlify Blobs. Supabase 미사용.
+요청: [수정할내용]
+유지사항: v3디자인·메뉴,스토어이름optic-v6-data/optic-v6-media,기존고객자료·비밀글해시·관리자권한·로그인이력호환.
+배포: 같은 GitHub 저장소 main → 같은 Netlify 프로젝트 smart-samsung-optic.
+필수: 변경버전/삭제파일목록/테스트결과/업데이트안내. 데이터파괴적변경금지,필요시먼저설명.
+전달금지: 고객백업JSON, 실제OPTIC_SETUP_KEY,Netlify토큰,SOLAPI비밀키.

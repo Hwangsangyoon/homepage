@@ -1,0 +1,58 @@
+{
+  "version": "6.0.0",
+  "syntax": [
+    {
+      "file": "server/core.mjs",
+      "ok": true,
+      "error": ""
+    },
+    {
+      "file": "server/defaults.mjs",
+      "ok": true,
+      "error": ""
+    },
+    {
+      "file": "netlify/functions/cleanup.mjs",
+      "ok": true,
+      "error": ""
+    },
+    {
+      "file": "netlify/functions/optic.mjs",
+      "ok": true,
+      "error": ""
+    },
+    {
+      "file": "netlify/functions/media.mjs",
+      "ok": true,
+      "error": ""
+    },
+    {
+      "file": "scripts/import-v3-assets.mjs",
+      "ok": true,
+      "error": ""
+    },
+    {
+      "file": "scripts/build.mjs",
+      "ok": true,
+      "error": ""
+    },
+    {
+      "file": "scripts/dev.mjs",
+      "ok": true,
+      "error": ""
+    },
+    {
+      "file": "app.js",
+      "ok": true,
+      "error": ""
+    }
+  ],
+  "unit_exit": 0,
+  "unit_pass": 53,
+  "unit_fail": 0,
+  "build_exit": 0,
+  "ui_pass": 10,
+  "ui_fail": 1,
+  "source_recovered": true,
+  "assets_count": 11
+}

@@ -1,0 +1,9 @@
+v3/v4/v5 → v6 첫 설치는 새 GitHub 저장소를 권장합니다.
+기존 소스에 섞지 말고 다음 오래된 파일이 배포되지 않도록 확인하세요.
+supabase_schema.sql
+supabase/ (이전SQL들)
+netlify/functions/send-message.js (기존무인증중계)
+netlify/functions/optic-api.* (v4/v5함수)
+reset-password.html (v5 Supabase복구화면)
+기존scripts/deploy.cjs 및 SITE_ID.txt
+단,이전버전과데이터백업은별도비공개보관후새버전검증까지삭제하지않습니다.
