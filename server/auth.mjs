@@ -1,102 +1,92 @@
-/** Owner-only email OTP. No browser secret, password, or magic-link redirect required. */
-import { randomBytes, randomInt, randomUUID, createHash, createHmac, timingSafeEqual } from 'node:crypto';
+/** v7.1: a single password, checked only on the server. No email provider required.
+ * Netlify project owner supplies OPTIC_ADMIN_PASSWORD for initial ownership proof.
+ * Stored password changes do not re-enable the consumed bootstrap password.
+ * To recover, the project owner supplies a NEW environment password and redeploys.
+ * Retired bootstrap fingerprints prevent replay from older deployments.
+ */
+import {randomBytes,randomUUID,createHash,createHmac,scrypt as scryptCallback,timingSafeEqual} from 'node:crypto';
+import {promisify} from 'node:util';
+const scrypt=promisify(scryptCallback);
 export class AuthError extends Error {
-  constructor(status, code, message) { super(message); this.status=status; this.code=code; }
+  constructor(status,code,message){super(message);this.status=status;this.code=code;}
 }
-const fail=(s,c,m)=>{throw new AuthError(s,c,m);};
+const fail=(status,code,message)=>{throw new AuthError(status,code,message);};
 const hash=v=>createHash('sha256').update(String(v)).digest('hex');
 const equal=(a,b)=>timingSafeEqual(Buffer.from(hash(a)),Buffer.from(hash(b)));
-const normalize=v=>String(v||'').trim().toLowerCase();
-const emailOK=v=>v.length<=254&&/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(v);
-const OTP_TTL=10*60*1000, COOLDOWN=60*1000, MAX_ATTEMPTS=5, SESSION_TTL=8*60*60*1000;
-export function createEmailAuth({store,env,fetcher,clock,limit,json,sendMail}) {
+const ADMIN='auth71/admin', SESSION='sessions71/', COOKIE='optic71_session', TTL=8*60*60*1000;
+const PASSWORD_RE=/^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/;
+export const validAdminPassword=p=>typeof p==='string'&&p.length>=12&&p.length<=128&&/[A-Za-z]/.test(p)&&/[0-9]/.test(p)&&!/[\s\x00-\x1f\x7f]/.test(p)&&!['password1234','Password1234','1234567890ab','abcdefghijkl1'].includes(p);
+async function encode(p){const salt=randomBytes(16).toString('hex');const key=await scrypt(p,salt,64,{N:16384,r:8,p:1,maxmem:64*1024*1024});return `scrypt:${salt}:${key.toString('hex')}`;}
+async function verify(p,h){if(typeof p!=='string'||p.length>128||!PASSWORD_RE.test(h||''))return false;const [,salt,k]=h.split(':');const key=await scrypt(p,salt,64,{N:16384,r:8,p:1,maxmem:64*1024*1024});return timingSafeEqual(key,Buffer.from(k,'hex'));}
+export function createPasswordAuth({store,env={},clock=Date.now,limit,json}){
   const now=()=>clock(), iso=()=>new Date(now()).toISOString();
-  const owner=()=>normalize(env.OPTIC_ADMIN_EMAIL);
-  const ready=()=>emailOK(owner())&&!!String(env.RESEND_API_KEY||'').trim();
-  const status=()=>({mode:'email-otp',ownerEmailConfigured:emailOK(owner()),mailKeyConfigured:!!String(env.RESEND_API_KEY||'').trim(),configured:ready()});
-  const get=key=>store.getWithMetadata(key,{type:'json'});
-  async function secret(){
-    const key='auth7/private-hmac';let r=await get(key);if(r)return r.data.key;
+  const get=k=>store.getWithMetadata(k,{type:'json'});
+  const initial=()=>String(env.OPTIC_ADMIN_PASSWORD||'');
+  const status=()=>({mode:'password',bootstrapConfigured:validAdminPassword(initial()),configured:validAdminPassword(initial()),externalMailRequired:false});
+  const activated=async()=>PASSWORD_RE.test((await get(ADMIN))?.data?.passwordHash||'');
+  async function privateSecret(){
+    const key='auth71/private-hmac';let r=await get(key);if(r?.data?.key)return r.data.key;
     await store.setJSON(key,{key:randomBytes(32).toString('hex')},{onlyIfNew:true});r=await get(key);
-    if(!r)fail(503,'AUTH_STORAGE','인증 저장소를 확인할 수 없습니다. 연결 진단을 확인해 주세요.');return r.data.key;
+    if(!r?.data?.key)fail(503,'AUTH_STORAGE','관리자 인증 저장소 응답을 확인하지 못했습니다. 연결 진단을 확인해 주세요.');return r.data.key;
   }
-  async function fingerprint(value){return createHmac('sha256',await secret()).update(value).digest('hex');}
-  const cookie=req=>(req.headers.get('cookie')||'').split(';').map(x=>x.trim()).find(x=>x.startsWith('optic7_session='))?.slice(15)||'';
-  const cookieValue=(req,token,maxAge=SESSION_TTL/1000)=>`optic7_session=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${new URL(req.url).protocol==='https:'?'; Secure':''}`;
+  async function fingerprint(value){return createHmac('sha256',await privateSecret()).update(String(value)).digest('hex');}
+  function cookieToken(req){const prefix=COOKIE+'=';return(req.headers.get('cookie')||'').split(';').map(v=>v.trim()).find(v=>v.startsWith(prefix))?.slice(prefix.length)||'';}
+  function cookieHeader(req,token,seconds=TTL/1000){return `${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${seconds}${new URL(req.url).protocol==='https:'?'; Secure':''}`;}
   async function session(req,required=false){
-    const token=cookie(req);let result=null;
-    if(/^[a-f0-9]{64}$/.test(token)&&emailOK(owner())){
-      const [s,a]=await Promise.all([get('sessions7/'+hash(token)),get('auth7/admin')]);
-      if(s&&a&&s.data.expiresAt>now()&&s.data.emailHash===hash(owner())&&s.data.generation===a.data.generation&&a.data.emailHash===hash(owner()))result={email:owner(),isDefault:false,generation:a.data.generation};
+    let result=null;const t=cookieToken(req);
+    if(/^[a-f0-9]{64}$/.test(t)){
+      const [s,a]=await Promise.all([get(SESSION+hash(t)),get(ADMIN)]);
+      if(s&&a&&s.data.expiresAt>now()&&s.data.generation===a.data.generation&&PASSWORD_RE.test(a.data.passwordHash||''))result={isDefault:false,generation:a.data.generation,authMode:'password'};
     }
-    if(!result&&required)fail(401,'LOGIN_REQUIRED','로그인이 만료되었습니다. 이메일 인증번호로 다시 로그인해 주세요.');return result;
+    if(!result&&required)fail(401,'LOGIN_REQUIRED','관리자 비밀번호로 로그인해 주세요. 로그인이 만료되었을 수 있습니다.');return result;
   }
-  async function activated(){const a=await get('auth7/admin');return !!a&&a.data.emailHash===hash(owner());}
-  async function adminRecord(){
-    for(let i=0;i<5;i++){const old=await get('auth7/admin');if(old?.data.emailHash===hash(owner()))return old.data;
-      const row={emailHash:hash(owner()),generation:randomUUID(),createdAt:iso()};
-      const r=await store.setJSON('auth7/admin',row,old?{onlyIfMatch:old.etag}:{onlyIfNew:true});if(r.modified)return row;
-    }fail(409,'AUTH_CONFLICT','다른 인증 요청이 처리 중입니다. 잠시 후 다시 시도해 주세요.');
+  async function issue(req,a,extra={}){
+    const token=randomBytes(32).toString('hex');
+    const saved=await store.setJSON(SESSION+hash(token),{generation:a.generation,expiresAt:now()+TTL,createdAt:iso()},{onlyIfNew:true});
+    if(!saved.modified)fail(503,'SESSION_CREATE','로그인을 저장하지 못했습니다. 다시 시도해 주세요.');
+    return json({ok:true,authenticated:true,isDefault:false,authMode:'password',...extra},200,{'Set-Cookie':cookieHeader(req,token)});
   }
-  async function requestCode(req,data,context){
-    if(!emailOK(owner()))fail(503,'OWNER_EMAIL_MISSING','최초 1회 Netlify에 OPTIC_ADMIN_EMAIL을 등록한 뒤 다시 배포해 주세요.');
-    if(!ready())fail(503,'MAIL_KEY_MISSING','인증메일 연결이 필요합니다. Netlify의 RESEND_API_KEY를 등록한 뒤 다시 배포해 주세요.');
-    const email=normalize(data.email);if(!emailOK(email))fail(400,'EMAIL_FORMAT','이메일 주소를 확인해 주세요.');
-    await limit(req,'otp-request-ip',8,600,context);
-    const generic={ok:true,challengeId:randomUUID(),expiresIn:600,resendAfter:60,message:'등록된 관리자 이메일이면 인증번호를 발송합니다. 가장 최근 메일의 6자리 번호를 입력해 주세요.'};
-    if(!equal(email,owner()))return json(generic);
-    // Global owner rate limit remains effective even if an attacker changes IP addresses.
-    await limit(req,'otp-owner-hour',6,3600,{ip:'owner-'+hash(owner())});
-    const key='otp7/'+hash(email),old=await get(key);
-    if(old&&now()-old.data.sentAt<COOLDOWN)fail(429,'OTP_COOLDOWN','인증번호는 60초 간격으로 요청할 수 있습니다. 잠시 후 다시 시도해 주세요.');
-    const id=randomUUID(),code=String(randomInt(0,1000000)).padStart(6,'0');
-    const row={id,emailHash:hash(email),codeHash:await fingerprint(id+':'+code),sentAt:now(),expiresAt:now()+OTP_TTL,attempts:0,state:'sending'};
-    const claimed=await store.setJSON(key,row,old?{onlyIfMatch:old.etag}:{onlyIfNew:true});
-    if(!claimed.modified)fail(429,'OTP_COOLDOWN','다른 발송 요청이 처리 중입니다. 잠시 후 다시 시도해 주세요.');
-    try{
-      const from=String(env.OPTIC_FROM_EMAIL||'SMART OPTIC <onboarding@resend.dev>').trim();
-      if(/[\r\n]/.test(from))fail(503,'MAIL_FROM','발신자 이메일 설정을 확인해 주세요.');
-      const mail={from,to:[email],subject:'[스마트옵틱] 관리자 로그인 인증번호',text:`관리자 로그인 인증번호: ${code}\n\n10분 동안 유효하며 한 번만 사용할 수 있습니다.\n요청하지 않았다면 이 메일을 무시해 주세요. 인증번호를 타인에게 전달하지 마세요.`};
-      if(sendMail)await sendMail({...mail,code,challengeId:id});
-      else {
-        const res=await fetcher('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${String(env.RESEND_API_KEY).trim()}`,'Content-Type':'application/json','Idempotency-Key':'optic-otp-'+id},body:JSON.stringify(mail),signal:AbortSignal.timeout(10000)});
-        const result=await res.json().catch(()=>({}));
-        if(!res.ok||!result.id){
-          if(res.status===401||result.name==='invalid_api_key')fail(503,'MAIL_KEY_INVALID','인증메일 API 키가 올바르지 않습니다. Netlify의 RESEND_API_KEY를 확인해 주세요.');
-          if(res.status===403)fail(503,'MAIL_SENDER_VERIFY','발신 도메인 인증 또는 테스트 수신자 제한을 확인해 주세요. 테스트 발신자는 Resend 가입 이메일로만 수신할 수 있습니다.');
-          if(res.status===429)fail(429,'MAIL_LIMIT','메일 서비스 발송 한도에 도달했습니다. 잠시 후 다시 시도해 주세요.');
-          fail(502,'MAIL_PROVIDER','메일 발송업체가 요청을 완료하지 못했습니다. 연결 진단과 발송업체 기록을 확인해 주세요.');
-        }
+  async function login(req,data,context){
+    await limit(req,'password-login71',15,600,context);
+    const p=data.password;
+    if(typeof p!=='string'||!p||p.length>128)fail(400,'PASSWORD_INPUT','관리자 비밀번호를 입력해 주세요.');
+    let old=await get(ADMIN);
+    if(old&&PASSWORD_RE.test(old.data.passwordHash||'')&&await verify(p,old.data.passwordHash))return issue(req,old.data);
+    const boot=initial();
+    if(!old&&!validAdminPassword(boot))fail(503,'ADMIN_PASSWORD_NOT_SET','처음 한 번 Netlify에 OPTIC_ADMIN_PASSWORD를 등록하고 다시 배포해 주세요. 영문·숫자를 포함한 12~128자입니다. 이메일 인증은 사용하지 않습니다.');
+    if(!validAdminPassword(boot)||!equal(p,boot))fail(401,'PASSWORD_INCORRECT','비밀번호가 일치하지 않습니다. 다시 입력해 주세요.');
+    const envFingerprint=await fingerprint(boot);
+    for(let i=0;i<5;i++){
+      old=await get(ADMIN);
+      if(old){
+        if(await verify(p,old.data.passwordHash))return issue(req,old.data);
+        if(old.data.envFingerprint===envFingerprint||(old.data.retiredEnvFingerprints||[]).includes(envFingerprint))fail(401,'PASSWORD_INCORRECT','비밀번호가 일치하지 않습니다. 관리자 화면에서 변경한 비밀번호를 입력해 주세요.');
       }
-      const r=await store.setJSON(key,{...row,state:'sent'},{onlyIfMatch:claimed.etag});
-      if(!r.modified)fail(409,'OTP_REPLACED','다른 발송 요청이 있었습니다. 가장 최근 인증번호를 사용해 주세요.');
-    }catch(e){
-      const current=await get(key);if(current?.data.id===id)await store.setJSON(key,{...current.data,state:'failed',codeHash:''},{onlyIfMatch:current.etag});
-      if(e instanceof AuthError)throw e;
-      fail(502,'MAIL_NETWORK','인증메일 전송을 확인하지 못했습니다. 60초 후 새 번호를 요청해 주세요.');
+      const a={passwordHash:await encode(p),generation:randomUUID(),envFingerprint,
+        retiredEnvFingerprints:[...new Set([...(old?.data.retiredEnvFingerprints||[]),...(old?.data.envFingerprint?[old.data.envFingerprint]:[])])],
+        createdAt:old?.data.createdAt||iso(),updatedAt:iso(),changedBy:old?'owner-environment-recovery':'first-login'};
+      if(a.retiredEnvFingerprints.length>1000)fail(503,'AUTH_HISTORY_LIMIT','관리자 복구 이력이 많습니다. 운영자 점검이 필요합니다.');
+      const saved=await store.setJSON(ADMIN,a,old?{onlyIfMatch:old.etag}:{onlyIfNew:true});
+      if(saved.modified)return issue(req,a,{firstLogin:!old,recovered:!!old});
     }
-    return json({...generic,challengeId:id});
+    fail(409,'AUTH_CONFLICT','다른 로그인 요청이 처리 중입니다. 다시 한 번 시도해 주세요.');
   }
-  async function verify(req,data,context){
-    await limit(req,'otp-verify-ip',25,600,context);
-    const email=normalize(data.email),id=String(data.challengeId||''),code=String(data.code||'').trim();
-    if(!emailOK(email)||!equal(email,owner())||!/^[0-9]{6}$/.test(code)||!/^[a-f0-9-]{36}$/.test(id))fail(401,'OTP_INVALID','이메일과 인증번호를 확인해 주세요.');
-    const key='otp7/'+hash(email);
-    for(let i=0;i<6;i++){
-      const old=await get(key),r=old?.data;
-      if(!r||r.id!==id||r.state!=='sent'||r.expiresAt<=now())fail(401,'OTP_EXPIRED','번호가 만료되었거나 이미 사용되었습니다. 새 인증번호를 받아 주세요.');
-      if(r.attempts>=MAX_ATTEMPTS)fail(429,'OTP_LOCKED','인증번호를 5회 잘못 입력했습니다. 새 인증번호를 받아 주세요.');
-      const matches=equal(await fingerprint(id+':'+code),r.codeHash);
-      const out=await store.setJSON(key,{...r,attempts:r.attempts+1,...(matches?{state:'used',codeHash:'',usedAt:now()}: {})},{onlyIfMatch:old.etag});
-      if(!out.modified)continue;
-      if(!matches)fail(401,'OTP_INVALID',`인증번호가 일치하지 않습니다. 남은 입력 기회: ${MAX_ATTEMPTS-r.attempts-1}회`);
-      const a=await adminRecord(),token=randomBytes(32).toString('hex');
-      await store.setJSON('sessions7/'+hash(token),{emailHash:hash(email),generation:a.generation,expiresAt:now()+SESSION_TTL,createdAt:iso()},{onlyIfNew:true});
-      return json({ok:true,authenticated:true,email,isDefault:false},200,{'Set-Cookie':cookieValue(req,token)});
-    }
-    fail(409,'AUTH_CONFLICT','중복 인증 요청이 처리되었습니다. 다시 로그인해 주세요.');
+  async function changePassword(req,data,context){
+    const s=await session(req,true);await limit(req,'password-change71',8,600,context);
+    if(!validAdminPassword(data.newPassword))fail(400,'PASSWORD_WEAK','새 비밀번호는 공백 없이 영문·숫자를 포함한 12~128자로 입력해 주세요.');
+    if(data.newPassword!==data.confirmPassword)fail(400,'PASSWORD_CONFIRM','새 비밀번호와 확인 입력이 다릅니다.');
+    const old=await get(ADMIN);
+    if(!old||old.data.generation!==s.generation)fail(401,'LOGIN_REQUIRED','로그인이 변경되었습니다. 다시 로그인해 주세요.');
+    if(!await verify(data.currentPassword,old.data.passwordHash))fail(401,'CURRENT_PASSWORD_INCORRECT','현재 비밀번호가 일치하지 않습니다.');
+    if(equal(data.newPassword,data.currentPassword))fail(400,'PASSWORD_SAME','현재와 다른 새 비밀번호를 입력해 주세요.');
+    const forbidden=(old.data.retiredEnvFingerprints||[]).includes(await fingerprint(data.newPassword));
+    if(forbidden)fail(400,'PASSWORD_REUSED','과거 복구용 비밀번호는 다시 사용하지 마세요. 새로운 값을 입력해 주세요.');
+    const a={...old.data,passwordHash:await encode(data.newPassword),generation:randomUUID(),updatedAt:iso(),changedBy:'administrator'};
+    const written=await store.setJSON(ADMIN,a,{onlyIfMatch:old.etag});
+    if(!written.modified)fail(409,'AUTH_CONFLICT','다른 변경이 있습니다. 새로 로그인 후 확인해 주세요.');
+    return issue(req,a,{message:'비밀번호를 변경했습니다. 다른 기기의 로그인은 종료됩니다.'});
   }
-  async function logout(req){const t=cookie(req);if(/^[a-f0-9]{64}$/.test(t))await store.delete('sessions7/'+hash(t));return json({ok:true},200,{'Set-Cookie':cookieValue(req,'',0)});}
-  async function logoutAll(req){await session(req,true);const a=await get('auth7/admin');const r=await store.setJSON('auth7/admin',{...a.data,generation:randomUUID()},{onlyIfMatch:a.etag});if(!r.modified)fail(409,'AUTH_CONFLICT','다른 변경이 있습니다. 다시 시도해 주세요.');return logout(req);}
-  return {status,activated,session,requestCode,verify,logout,logoutAll,fingerprint};
+  async function logout(req){const t=cookieToken(req);if(/^[a-f0-9]{64}$/.test(t))await store.delete(SESSION+hash(t));return json({ok:true},200,{'Set-Cookie':cookieHeader(req,'',0)});}
+  async function logoutAll(req){await session(req,true);const old=await get(ADMIN);const saved=await store.setJSON(ADMIN,{...old.data,generation:randomUUID()},{onlyIfMatch:old.etag});if(!saved.modified)fail(409,'AUTH_CONFLICT','다른 변경이 있습니다. 다시 시도해 주세요.');return logout(req);}
+  return {status,activated,session,login,changePassword,logout,logoutAll,fingerprint};
 }

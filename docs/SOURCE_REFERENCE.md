@@ -1,19 +1,11 @@
-# Source basis / implementation vs external facts
+# 변경 근거와 검증 구분
+원본: 이 대화에서 제공된 v7 ZIP(7.0.0).
+요청: 관리자 비밀번호 방식, 기존 운영자료 보존, 외부 메일 가입/인증 제거.
 
-## Local task sources
-- Uploaded smart_samsung_optic_webapp_v6_netlify_github.zip: inspected actual HTML/CSS/assets/server code.
-- Uploaded Homepage.zip and October promotional image: existing style/assets preserved through v6 source.
-- User reported looping consult/inquiry submission and wanted OTP/delete. Production failing request traces were not supplied; exact live root cause was not conclusively identified.
+공식 문서(2026-10-17 확인):
+- https://docs.netlify.com/build/functions/environment-variables/ — Functions 범위, 환경변수 변경 후 새 배포
+- https://docs.netlify.com/build/data-and-storage/netlify-blobs/ — 사이트 범위 저장소, strong consistency, conditional writes
+- https://cli.netlify.com/commands/deploy/ — dir/functions/prod/no-build 옵션
+- https://nodejs.org/api/crypto.html — scrypt / timingSafeEqual
 
-## External official documentation reviewed 2026-10-17
-- https://docs.netlify.com/build/data-and-storage/netlify-blobs/ (site-wide persistence, strong consistency, conditional writes)
-- https://github.com/netlify/primitives/blob/main/packages/blobs/CHANGELOG.md (SDK 11.1.4)
-- https://docs.netlify.com/build/functions/scheduled-functions/ (production schedule, UTC and execution limits)
-- https://docs.netlify.com/build/functions/environment-variables/ (server secrets/redeploy)
-- https://docs.netlify.com/manage/accounts-and-billing/billing/resume-paused-projects/ (usage-limit pauses)
-- https://supabase.com/docs/guides/deployment/going-into-prod (7-day low-activity free-project pausing; Pro not paused for inactivity)
-- https://resend.com/docs/api-reference/errors (test recipient restriction, mail API errors)
-- https://resend.com/docs/dashboard/domains/introduction (verified production sender)
-
-## Design decision
-Keep the existing small-data Netlify store, no Supabase migration or dummy keepalive. Daily backup/cleanup is application maintenance, not a guarantee against platform suspension.
+구현 및 검사결과는 소스코드와 QA_REPORT.md를 기준으로 함. 공식 문서가 이 앱의 라이브 배포 성공을 보증하지 않음.

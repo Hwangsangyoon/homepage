@@ -1,34 +1,38 @@
-# v7 Architecture and operating boundaries
+# v7.1 설계 메모
 
-## Request path
-Browser -> same-origin /api/optic -> Netlify Function -> site-scoped private Netlify Blobs.
-Images -> /api/media/:key using existing optic-v6-media. Uploaded images are public website assets; do not upload IDs/medical documents.
-OTP request -> configured owner only -> Resend API using server-only key. No Netlify Identity/Supabase needed.
+## 보존 범위
+기준 원본: smart_samsung_optic_webapp_v7_netlify_github.zip.
+UI 골격, 폰트/색상, CSS, 사진, 제품/게시글/재고/고객/발송내역의 구조는 유지.
+저장소: getStore({name:'optic-v6-data',consistency:'strong'})와 optic-v6-media.
+배포 단위 저장소가 아니라 사이트 범위 저장소. 시험 배포도 같은 데이터를 공유.
 
-## Persistence
-`optic-v6-data` and `optic-v6-media` are deliberately unchanged. getStore strong consistency; conditional ETag writes avoid stale overwrite for mutable records.
-Site-wide store means production and draft share data. No test seeding against live projects.
-No cross-record transactional invariant: orders and inventory are independently maintained; no ACID stock/order decrement guarantee.
-Small shop use, mostly reads, low write concurrency. SDK 11.1.4 documented conditional mutations.
+## 인증
+server/auth.mjs createPasswordAuth. 비밀번호 원문은 클라이언트 파일에 없음.
+OPTIC_ADMIN_PASSWORD는 Netlify Functions 범위에 등록. 초기 한 번 정한 값을 로그인창에 입력.
+올바른 초기 값에 대해서만 auth71/admin을 CAS(onlyIfNew / ETag)로 생성.
+scrypt N=16384 r=8 p=1 salt=128bit. 비밀번호 12~128자 영문+숫자, 공백 불가.
+로그인 session은 서버에 해시된 토큰으로 보관, HttpOnly/SameSite=Strict/Secure 쿠키.
+8시간 만료, 비밀번호 변경시 generation 갱신으로 기존 세션 무효화.
+동일 IP 10분 15회 로그인 요청 제한. 사이트 함수 자체 rateLimit 유지.
+비밀번호 변경은 현재 비밀번호 재확인, 새 값/확인 일치, CAS 검사.
+Resend·Supabase에 로그인 요청을 보내지 않음.
 
-## Secrets/auth
-Server-generated random HMAC secret, no fixed passwords. OTP code stored only as HMAC, owner email read from env.
-Server sessions stored by hashed random token; browser HttpOnly SameSite=Strict Secure cookie (HTTPS).
-5 attempts / 600 seconds / owner/global/IP throttles. Mail key/from access configured by owner, never client-visible.
-Only authenticated owner CRUD, export, trash, restore, permanent purge and messages.
-Public titles are intentionally public; phone/name/private content filtered. Private post password scrypt with salt. Inline scripts forbidden by CSP.
+## 소유자 복구
+Netlify 계정의 환경변수를 이전에 쓰지 않은 새 비밀번호로 변경 후 재배포.
+새 환경변수와 동일한 값으로 로그인 요청할 때만 복구 수행. GET으로 비밀번호 변경하지 않음.
+이미 소비한 초기 값/이전 복구값은 복구에 재사용하지 못함. HMAC 지문 이력을 저장.
+Netlify 프로젝트 소유자는 서버 코드를 수정할 수도 있으므로 Netlify 계정 자체를 보호해야 함.
+기존 auth7 관리자·OTP자료는 자동 공개/전환하지 않음. 민감정보를 백업이나 진단에 포함하지 않음.
+롤백하여 v7을 재배포하면 기존 이메일 로그인 방식으로 돌아갈 수 있으므로 인증 구조 롤백은 피함.
 
-## Robustness
-Client AbortController 20s, no background automatic retries of POST. Timeout does not prove server rollback.
-The same form keeps a UUID request key. Server atomic onlyIfNew plus HMAC content fingerprint returns receipt once; deletion keeps non-PII tombstone to stop retry resurrection.
-Storage operations bounded 8 seconds each, batched reads of12, explicit size/record ceilings. Total provider/platform function timeout still applies.
-Logs carry safe codes/request IDs, not OTP/password/key. Provider dispatch UNKNOWN must be reconciled, never blindly resent.
+## 상담 및 데이터
+기존 v7의 서버 검사, 20초 클라이언트 응답시간 제한, 같은 폼 requestKey 중복 방지 유지.
+HTTP 응답시간 초과가 DB 쓰기 취소를 뜻하지 않음. 같은 폼 재시도는 중복 등록을 방지.
+제목 공개, 이름/전화번호 비공개, 비밀글은 서버에서 비밀번호 검사.
+관리자 삭제는 휴지통, CAS 충돌 방지, 복원, 영구삭제, 30일 정리 유지.
+관리자 권한과 개인정보 문구 확인 후 접수 허용하는 fail-closed 기본값 유지.
 
-## Backups/trash
-Read-only logical export of active records/posts/messages/config. No image binaries or auth secrets. 4.5MB export ceiling, per-collection import ceiling3000.
-Daily UTC19:17(KST04:17) on production only; keep7 dates. Same-project snapshot is not offsite backup or ACID point-in-time recovery.
-30day soft delete with explicit restore/purge and tombstones. Prior snapshots/owner downloaded backups can still contain older data, retention must be managed.
-Scheduled invocation is subject to platform time/resource limits. Verify lastCompletedAt; manual backup available.
-
-## Scaling
-Move to a managed relational database when bulk data, multiple staff writes, complex joins, financial integrity or automated stock deduction needs transactions. No daily fake query to promise a free-tier uptime SLA.
+## 한계
+단일 매장 소규모 저장구조이며 관계형 트랜잭션 DB 아님. 전체 목록 읽기 한도 존재.
+기존 주기 백업은 같은 사이트 안 사본. JSON에 이미지 바이너리 및 인증정보 포함하지 않음.
+Netlify 실행 한도/요금/계정 중지를 방지하지 못함. 사진 원본과 JSON 외부 보관 필요.

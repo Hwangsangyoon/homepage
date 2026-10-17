@@ -1,0 +1,18 @@
+스마트안경원 v7.1.0 — 이메일 없이 비밀번호 한 칸 로그인
+
+1. Netlify의 현재 homepage 프로젝트에 비밀번호 하나만 등록합니다.
+   Key: OPTIC_ADMIN_PASSWORD
+   Value: 직접 정한 영문+숫자 12~128자 비밀번호 (공백 없이)
+   Contains secret values 체크 / All scopes / 모든 환경 동일 값
+   외부에서 발급받는 API 키가 아닙니다.
+
+2. v7.1 전체 파일을 기존 v7 작업폴더에 덮어쓰고 03_UPDATE_SITE.cmd 실행 → UPDATE.
+   기존 SITE_ID.txt와 .netlify는 유지합니다. 새 프로젝트를 만들지 마세요.
+   GitHub를 사용 중이면 동일 저장소에 전체파일 반영 → Commit/Push.
+   화면만 올리지 말고 server와 netlify/functions도 함께 배포합니다.
+
+3. 배포 완료 → 홈페이지 Ctrl+F5 → 관리자 비밀번호 입력.
+   관리자 기본설정에서 개인정보 안내 확인 후 고객 상담·예약 접수 허용 저장.
+
+상세 안내는 START_HERE.html을 더블클릭하세요.
+실제 계정 배포와 Netlify 데이터통신은 배포 후 확인해야 합니다.

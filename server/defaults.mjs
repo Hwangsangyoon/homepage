@@ -1,4 +1,4 @@
-export const VERSION='7.0.0';
+export const VERSION='7.1.0';
 export const SETTINGS={
  storeName:'스마트삼성구내안경원',englishName:'Smart Optic',owner:'황상윤',phone:'010-4170-7575',bizno:'454-13-03335',
  address:'경북 구미시 삼성 구미 제2캠퍼스 내 구내 매장',hours:'평일 근무시간 중심 운영 · 방문 전 문의',holiday:'캠퍼스 운영일정 및 매장 휴무 공지를 확인해 주세요.',

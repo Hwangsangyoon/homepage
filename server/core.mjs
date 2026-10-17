@@ -1,6 +1,6 @@
 import {boundedStore,StorageError} from './storage.mjs';
 import {randomBytes,randomUUID,createHash,createHmac,scryptSync,timingSafeEqual} from 'node:crypto';
-import {createEmailAuth,AuthError} from './auth.mjs';
+import {createPasswordAuth,AuthError} from './auth.mjs';
 import {VERSION,SETTINGS,PRODUCT_SEEDS,EVENT_SEEDS,TEMPLATE_SEEDS,COLLECTIONS} from './defaults.mjs';
 const MAX_IMAGE=2*1024*1024, SESSION_SECONDS=8*60*60;
 export class AppError extends Error{constructor(status,code,message){super(message);this.status=status;this.code=code;}}
@@ -39,10 +39,10 @@ export function createApp({store,media,env={},fetcher=fetch,clock=Date.now,logge
  function postMeta(p){return {id:p.id,title:p.title,kind:p.kind,status:p.status,createdAt:p.createdAt,isPrivate:!!p.passwordHash,hasReply:!!p.reply};}
  function sanitize(c,input){if(!COLLECTIONS.includes(c))fail(400,'BAD_COLLECTION','알 수 없는 관리 항목입니다.');const r={};for(const k of allowedFields[c]||[]){if(input[k]===undefined)continue;r[k]=['featured','published','active','consent'].includes(k)?input[k]===true:['quantity','amount'].includes(k)?Number(input[k]):text(input[k],k==='content'||k==='note'||k==='desc'?10000:1000);}
   if(r.image!==undefined)r.image=safeImage(r.image);if(r.phone!==undefined)r.phone=phone(r.phone);if(r.quantity!==undefined&&(!Number.isSafeInteger(r.quantity)||r.quantity<0))fail(400,'QUANTITY','수량은 0 이상의 정수로 입력해 주세요.');if(r.amount!==undefined&&(!Number.isFinite(r.amount)||r.amount<0))fail(400,'AMOUNT','금액을 확인해 주세요.');if(c==='events'){if(!r.title)fail(400,'TITLE','공지 제목을 입력해 주세요.');if(!['event','notice'].includes(r.kind))r.kind='notice';}if(c==='products'&&!r.name)fail(400,'NAME','제품명을 입력해 주세요.');return r;}
- const auth=createEmailAuth({store,env,fetcher,clock,limit,json,sendMail});
+ const auth=createPasswordAuth({store,env,fetcher,clock,limit,json,sendMail});
  const session=(req,required=false)=>auth.session(req,required);
  async function publicData(){await seed();const s=await cfg();return {ok:true,version:VERSION,settings:Object.fromEntries(publicKeys.map(k=>[k,s[k]])),products:(await list('records/products/')).filter(p=>p.published!==false).map(({_etag,...r})=>r),events:(await list('records/events/')).filter(e=>e.active!==false).map(({_etag,...r})=>r),intakeReady:s.acceptingPosts&&s.privacyReviewed&&await auth.activated()};}
- async function handle(req,context={}){const url=new URL(req.url),action=url.searchParams.get('action')||'health';const requestId='OP7-'+randomBytes(6).toString('hex').toUpperCase();try{
+ async function handle(req,context={}){const url=new URL(req.url),action=url.searchParams.get('action')||'health';const requestId='OP71-'+randomBytes(6).toString('hex').toUpperCase();try{
  if(req.method==='OPTIONS')return new Response(null,{status:405,headers:{'Cache-Control':'no-store'}});
  if(req.method==='GET'){
  if(action==='health'){await store.get('config/seed');return json({ok:true,version:VERSION,storage:'netlify-blobs',auth:auth.status(),initialized:await auth.activated(),isDefault:false});}
@@ -59,11 +59,12 @@ export function createApp({store,media,env={},fetcher=fetch,clock=Date.now,logge
  fail(405,'METHOD','이 작업은 올바른 요청 방식으로 실행해 주세요.');
  }
  if(req.method!=='POST')fail(405,'METHOD','허용되지 않은 요청입니다.');validateOrigin(req);const data=await body(req,action==='upload'?3200000:action==='import'?4900000:200000);
- if(action==='otp-request')return await auth.requestCode(req,data,context);
- if(action==='otp-verify')return await auth.verify(req,data,context);
+ if(action==='login')return await auth.login(req,data,context);
+ if(action==='password')return await auth.changePassword(req,data,context);
+ if(['otp-request','otp-verify','owner-reset'].includes(action))fail(410,'PASSWORD_LOGIN','v7.1은 이메일 인증 없이 관리자 비밀번호로 로그인합니다. 화면을 새로고침해 주세요.');
  if(action==='logout')return await auth.logout(req);
  if(action==='logout-all')return await auth.logoutAll(req);
- if(['login','password','owner-reset'].includes(action))fail(410,'EMAIL_LOGIN','v7은 비밀번호 대신 관리자 이메일 인증번호로 로그인합니다. 화면을 새로고침해 주세요.');
+
  if(action==='backup-now'){await session(req,true);await takeSnapshot();return json({ok:true,message:'오늘 자료의 별도 백업을 저장했습니다.'});}
  if(action==='trash-restore'||action==='trash-purge'){
    await session(req,true);const key=text(data.key,200);if(!/^(posts|messages)\/[A-Za-z0-9_-]+$/.test(key)&&!/^records\/[A-Za-z]+\/[A-Za-z0-9_-]+$/.test(key))fail(400,'ID','자료 경로를 확인해 주세요.');
@@ -118,7 +119,7 @@ export function createApp({store,media,env={},fetcher=fetch,clock=Date.now,logge
    if(Buffer.byteLength(JSON.stringify(doc))>4500000)fail(413,'BACKUP_TOO_LARGE','백업이 4.5MB를 넘었습니다. 분할 내보내기 또는 데이터베이스 전환 점검이 필요합니다.');return doc;
  }
  async function takeSnapshot(){const d=await backupDocument();const day=new Date(now()+9*3600000).toISOString().slice(0,10);await store.setJSON('snapshots/'+day,d);return d;}
- async function cleanup(){let deleted=0;for(const prefix of ['sessions/','sessions7/','limits/','otp7/'])for(const key of (await keys(prefix)).slice(0,1000)){const r=await read(key);if(r&&r.data.expiresAt<now()){await store.delete(key);deleted++;}}return {deleted};}
+ async function cleanup(){let deleted=0;for(const prefix of ['sessions/','sessions7/','sessions71/','limits/','otp7/'])for(const key of (await keys(prefix)).slice(0,1000)){const r=await read(key);if(r&&r.data.expiresAt<now()){await store.delete(key);deleted++;}}return {deleted};}
  async function dailyMaintenance(){
    const snap=await takeSnapshot();const expired=await cleanup();let purged=0;
    // Deleted rows retain a minimal tombstone, preventing duplicate retry resurrection.

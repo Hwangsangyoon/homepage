@@ -1,114 +1,127 @@
-[
-  {
-    "test": "v3-based homepage and October popup render",
-    "pass": true
-  },
-  {
-    "test": "email OTP administrator login",
-    "pass": true
-  },
-  {
-    "test": "existing admin settings saved and public intake enabled",
-    "pass": true
-  },
-  {
-    "test": "home image upload and persistent configuration",
-    "pass": true
-  },
-  {
-    "test": "product create via existing management UI",
-    "pass": true
-  },
-  {
-    "test": "admin delete moves record to private trash",
-    "pass": true
-  },
-  {
-    "test": "admin restore action completes",
-    "pass": true
-  },
-  {
-    "test": "manual daily server backup is downloadable",
-    "pass": true
-  },
-  {
-    "test": "consult submission sends only once and ends",
-    "pass": true
-  },
-  {
-    "test": "consult submit button shows completed state",
-    "pass": true
-  },
-  {
-    "test": "inquiry submission sends only once and ends",
-    "pass": true
-  },
-  {
-    "test": "inquiry submit button shows completed state",
-    "pass": true
-  },
-  {
-    "test": "reservation submission sends only once and ends",
-    "pass": true
-  },
-  {
-    "test": "reservation submit button shows completed state",
-    "pass": true
-  },
-  {
-    "test": "wrong secret-board password rejected",
-    "pass": true
-  },
-  {
-    "test": "correct secret-board password allows content",
-    "pass": true
-  },
-  {
-    "test": "network failure recovers submit button",
-    "pass": true
-  },
-  {
-    "test": "network failure preserves typed form",
-    "pass": true
-  },
-  {
-    "test": "network failure does not auto-loop",
-    "pass": true
-  },
-  {
-    "test": "manual retry after network failure succeeds",
-    "pass": true
-  },
-  {
-    "test": "administrator can answer without a post password",
-    "pass": true
-  },
-  {
-    "test": "test SMS creates a log, not a real dispatch",
-    "pass": true
-  },
-  {
-    "test": "administrator can delete message history",
-    "pass": true
-  },
-  {
-    "test": "mobile OTP login no horizontal overflow",
-    "pass": true
-  },
-  {
-    "test": "no uncaught browser JavaScript errors",
-    "pass": true
-  },
-  {
-    "test": "20-second client abort stops a stalled request",
-    "pass": true
-  },
-  {
-    "test": "timeout keeps entered content",
-    "pass": true
-  },
-  {
-    "test": "timeout never starts an automatic request loop",
-    "pass": true
-  }
-]
+{
+  "tests": [
+    {
+      "test": "password-only login visible, no email field",
+      "result": "PASS"
+    },
+    {
+      "test": "wrong password gets specific message; button restored",
+      "result": "PASS"
+    },
+    {
+      "test": "first login activates administrator without email provider",
+      "result": "PASS"
+    },
+    {
+      "test": "dashboard shows direct route to closed intake setting",
+      "result": "PASS"
+    },
+    {
+      "test": "privacy review and intake switch save without redeploy",
+      "result": "PASS"
+    },
+    {
+      "test": "password changed from administrator screen",
+      "result": "PASS"
+    },
+    {
+      "test": "consumed bootstrap password rejected after password change",
+      "result": "PASS"
+    },
+    {
+      "test": "new password logs in with no Netlify reconfiguration",
+      "result": "PASS"
+    },
+    {
+      "test": "guest intake open after admin save",
+      "result": "PASS"
+    },
+    {
+      "test": "network failure restores button and preserves content",
+      "result": "PASS"
+    },
+    {
+      "test": "actual 20-second response timeout stops pending state",
+      "result": "PASS"
+    },
+    {
+      "test": "double form submission sends only one request",
+      "result": "PASS"
+    },
+    {
+      "test": "customer inquiry stored and completion displayed",
+      "result": "PASS"
+    },
+    {
+      "test": "private post protects body on wrong password",
+      "result": "PASS"
+    },
+    {
+      "test": "private body opens with correct password; phone remains hidden",
+      "result": "PASS"
+    },
+    {
+      "test": "검안상담 submission completes",
+      "result": "PASS"
+    },
+    {
+      "test": "예약·주문 submission completes",
+      "result": "PASS"
+    },
+    {
+      "test": "administrator opens private post without password and replies",
+      "result": "PASS"
+    },
+    {
+      "test": "administrator deletes post to trash",
+      "result": "PASS"
+    },
+    {
+      "test": "deleted post restored from trash",
+      "result": "PASS"
+    },
+    {
+      "test": "product registration and deletion work after auth upgrade",
+      "result": "PASS"
+    },
+    {
+      "test": "photo upload and stored photo path survive new render",
+      "result": "PASS"
+    },
+    {
+      "test": "event popup settings saved",
+      "result": "PASS"
+    },
+    {
+      "test": "test message history saved without external call",
+      "result": "PASS"
+    },
+    {
+      "test": "message history deletion preserved",
+      "result": "PASS"
+    },
+    {
+      "test": "manual snapshot generated",
+      "result": "PASS"
+    },
+    {
+      "test": "diagnostics shows password mode and version",
+      "result": "PASS"
+    },
+    {
+      "test": "mobile login has no horizontal overflow",
+      "result": "PASS"
+    },
+    {
+      "test": "mobile administrator login and dashboard",
+      "result": "PASS"
+    },
+    {
+      "test": "no uncaught browser JavaScript errors",
+      "result": "PASS"
+    }
+  ],
+  "passed": 30,
+  "failed": 0,
+  "scope": "Isolated Chromium DOM + real local Node application using MemoryStore, cookie HTTP bridge; browser-managed navigation policy prevented direct localhost navigation; no live Netlify/Blobs calls."
+}

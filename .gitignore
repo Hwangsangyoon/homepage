@@ -10,3 +10,6 @@ SITE_ID.txt
 backups/
 qa/
 .DS_Store
+
+qa/
+.local-*
